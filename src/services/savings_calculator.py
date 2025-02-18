@@ -9,6 +9,7 @@ class SavingsCalculator:
         self.curr_ec2 = self._load_current_usage(data_dir / "currfile.csv")
         self.start_date = start_date
         self.end_date = end_date
+        # Pre-filter usage data to improve performance in subsequent calculations
         self.usage_df = self.curr_ec2.query("start_time >= @start_date and end_time <= @end_date")
 
     def _load_saving_plans(self, file_path):
@@ -19,6 +20,8 @@ class SavingsCalculator:
             ],
             axis=1,
         )
+        # Filter for EC2 instances only and specific operations
+        # This includes both regular and dedicated host instances (:0002)
         return saving_plans.query(
             "servicecode=='AmazonEC2' and operation in ['RunInstances','RunInstances:0002', 'Hourly']"
         ).drop("servicecode", axis=1)
@@ -30,7 +33,10 @@ class SavingsCalculator:
             "usageamount", "ondemandrate"
         ]
         
+        # Filter for EC2 instances only and specific operations
+        # This includes both regular and dedicated host instances (:0002)
         curr_ec2 = curr.query("operation in ['RunInstances','RunInstances:0002', 'Hourly']")
+        # TODO: Confirm  if UTC timezone is the correct choice for this data
         curr_ec2[["start_time", "end_time"]] = curr_ec2.timeinterval.str.split("/", expand=True)
         curr_ec2["start_time"] = pd.to_datetime(curr_ec2.start_time, utc=True)
         curr_ec2["end_time"] = pd.to_datetime(curr_ec2.end_time, utc=True)
@@ -39,17 +45,21 @@ class SavingsCalculator:
     def calculate_savings(self, start_date: pd.Timestamp, end_date: pd.Timestamp, commitment_amount: float):
         ec2_calculated_spenditure = (
             self.usage_df.merge(self.saving_plans, on=["operation", "usagetype"], how="left")
+            # Sort by time and savings percentage to prioritize best savings
             .sort_values(["end_time", "perc_savings"], ascending=[True, False])
             .assign(discount_price_cumulative=lambda df: (df.rate * df.usageamount).cumsum())
             .assign(haswithin_dicount_budget=lambda df: df.discount_price_cumulative <= commitment_amount)
         )
 
+        # Calculate costs for instances within and outside budget for each hour
         within_outside_budget = ec2_calculated_spenditure.groupby("start_time").apply(
             get_within_and_outside_budget_expenses, commitment_amount=commitment_amount
         )
 
+        # Calculate total hours in the period for budget calculations
         all_possible_hours = (end_date - start_date).total_seconds() / 3600
         total_commited_budget_in_all_hours = commitment_amount * all_possible_hours
+        
         with_discount_spent = within_outside_budget.within_budget.sum()
         without_discount_spent = within_outside_budget.outside_budget.sum()
         equivalent_without_discount = within_outside_budget.price_without_discount.sum()
@@ -65,24 +75,30 @@ class SavingsCalculator:
             "savings_percentage": savings
         }
 
-    def find_optimal_commitment(self, tolerance: float = 0.01) -> dict:
+    def find_optimal_commitment(self, tolerance: float = 0.5) -> dict:
         """
         Find the optimal commitment amount using binary search for the initialized date range.
         Returns the commitment amount that provides the best balance of savings and utilization.
+        
+        Args:
+            tolerance: The minimum difference between max and min commitment to continue searching
         """
-        max_commitment = 100#(self.usage_df.usageamount * self.usage_df.ondemandrate).sum()
+        max_commitment = (self.usage_df.usageamount * self.usage_df.ondemandrate).max()
         min_commitment = 0.0
         
+        # Binary search for optimal commitment amount
         while (max_commitment - min_commitment) > tolerance:
             mid_commitment = (min_commitment + max_commitment) / 2
-            print(mid_commitment)
             result = self.calculate_savings(self.start_date, self.end_date, mid_commitment)
             
+            # Adjust search range based on budget utilization
+            # Target is ~95% utilization for optimal efficiency
             if result['used_committed_budget_percentage'] < 95:
                 max_commitment = mid_commitment
             else:
                 min_commitment = mid_commitment
 
+            # Early exit if we're very close to 100% utilization
             if abs(result['used_committed_budget_percentage'] - 100) < 1:
                 break
 
