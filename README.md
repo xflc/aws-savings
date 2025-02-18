@@ -49,7 +49,7 @@ Install dependencies:
    python src/main.py
 
    # Option 2: Run with uvicorn
-   python -m uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+   uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
    ```
 
 2. API Endpoints:

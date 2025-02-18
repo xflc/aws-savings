@@ -1,10 +1,10 @@
 import pandas as pd
 from pathlib import Path
-from src.utils.utils import get_within_and_outside_budget_expenses
+from aws_savings.utils.utils import get_within_and_outside_budget_expenses
 
 class SavingsCalculator:
     def __init__(self, start_date: pd.Timestamp, end_date: pd.Timestamp):
-        data_dir = Path("src/data")
+        data_dir = Path("aws_savings/data")
         self.saving_plans = self._load_saving_plans(data_dir / "savingsplanrates.csv")
         self.curr_ec2 = self._load_current_usage(data_dir / "currfile.csv")
         self.start_date = start_date

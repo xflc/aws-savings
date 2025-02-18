@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from src.models.savings_request import SavingsRequest, SavingsResponse, OptimalSavingsRequest
-from src.services.savings_calculator import SavingsCalculator
+from aws_savings.models.savings_request import SavingsRequest, SavingsResponse, OptimalSavingsRequest
+from aws_savings.services.savings_calculator import SavingsCalculator
 import pandas as pd
 
 app = FastAPI()
