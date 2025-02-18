@@ -14,7 +14,7 @@ This project provides an API to analyze AWS EC2 usage data and calculate potenti
 
 ```
 .
-├── src/
+├── aws_savings/
 │   ├── data/              # Raw data files
 │   │   ├── currfile.csv          # EC2 instance usage history
 │   │   ├── head_curr.csv         # Sample of usage data for testing
@@ -28,7 +28,7 @@ This project provides an API to analyze AWS EC2 usage data and calculate potenti
 
 ## Data Files
 
-The `src/data/` directory contains the following files:
+The `aws_savings/data/` directory contains the following files:
 
 - `currfile.csv`: Contains historical EC2 instance usage data with columns for operation type, usage amount, and on-demand rates
 - `head_curr.csv`: A smaller subset of the usage data, useful for testing and development
@@ -46,10 +46,10 @@ Install dependencies:
 1. Start the API server (choose one of these options):
    ```bash
    # Option 1: Run directly with Python
-   python src/main.py
+   python aws_savings/main.py
 
    # Option 2: Run with uvicorn
-   uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+   uvicorn aws_savings.main:app --reload --host 0.0.0.0 --port 8000
    ```
 
 2. API Endpoints:
