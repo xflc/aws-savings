@@ -16,25 +16,25 @@ class SavingsCalculator:
         saving_plans = pd.read_csv(file_path).drop(
             [
                 "purchaseoption", "plantype", "sku", "ratecode", "unit",
-                "contractlength", "rate_type", "discountedsku"
+                "contractlength", "rate_type", "discountedsku", "servicecode"
             ],
             axis=1,
         )
-        # Filter for EC2 instances only and specific operations
-        # This includes both regular and dedicated host instances (:0002)
+        # Filter for EC2 instances. I believe these are the correct operations, but i might be wrong here
+        # This should include both regular and dedicated host instances (:0002)
         return saving_plans.query(
-            "servicecode=='AmazonEC2' and operation in ['RunInstances','RunInstances:0002', 'Hourly']"
-        ).drop("servicecode", axis=1)
+            "operation in ['RunInstances','RunInstances:0002', 'Hourly']"
+        )
 
     def _load_current_usage(self, file_path):
-        curr = pd.read_csv(file_path, sep="|").drop(["lineitem/lineitemdescription"], axis=1)
+        curr = pd.read_csv(file_path, sep="|").drop(["lineitem/lineitemdescription", "lineitem/productcode"], axis=1)
         curr.columns = [
-            "operation", "usagetype", "timeinterval", "productcode",
+            "operation", "usagetype", "timeinterval",
             "usageamount", "ondemandrate"
         ]
         
-        # Filter for EC2 instances only and specific operations
-        # This includes both regular and dedicated host instances (:0002)
+        # Filter for EC2 instances. I believe these are the correct operations, but i might be wrong here
+        # This should include both regular and dedicated host instances (:0002)
         curr_ec2 = curr.query("operation in ['RunInstances','RunInstances:0002', 'Hourly']")
         # TODO: Confirm  if UTC timezone is the correct choice for this data
         curr_ec2[["start_time", "end_time"]] = curr_ec2.timeinterval.str.split("/", expand=True)

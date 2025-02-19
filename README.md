@@ -38,18 +38,26 @@ The `aws_savings/data/` directory contains the following files:
 
 Install dependencies:
    ```
-   pip install -r requirements.txt
+
+Install dependencies:
+   ```bash
+   poetry install
    ```
 
 ## Usage
 
 1. Start the API server (choose one of these options):
    ```bash
-   # Option 1: Run directly with Python
-   python aws_savings/main.py
+   # Option 1: Run directly with Poetry
+   poetry run python aws_savings/main.py
 
-   # Option 2: Run with uvicorn
-   uvicorn aws_savings.main:app --reload --host 0.0.0.0 --port 8000
+   # Option 2: Run with uvicorn through Poetry
+   poetry run uvicorn aws_savings.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+
+2. Activate virtual environment (for development):
+   ```bash
+   poetry shell
    ```
 
 2. API Endpoints:
