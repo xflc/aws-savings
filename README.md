@@ -43,9 +43,7 @@ The `aws_savings/data/` directory contains the following files:
 ## Installation
 
 Install dependencies:
-   ```
 
-Install dependencies:
    ```bash
    poetry install
    ```
