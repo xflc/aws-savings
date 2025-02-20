@@ -80,7 +80,7 @@ POST /calculate-savings
 {
     "start_date": "2023-01-01T00:00:00Z",
     "end_date": "2023-01-14T00:00:00Z",
-    "commitment_amount": 100
+    "commitment_amount": 8
 }
 ```
 
