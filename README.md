@@ -5,7 +5,7 @@ This project provides solutions to the Efficio Cloud Analytics Case Study challe
 ## Problem Solutions
 
 - **Problem 1**: Refer to the Jupyter notebook in `/notebooks/calculate_per_instance_interactive.ipynb`
-- **Problem 2**: [AWS Architecture Solution](https://drive.google.com/file/d/1QPOPyR9SUS5qsa19_fwivdklrrZCrOKU/view?usp=sharing)
+- **Problem 2**: [AWS Architecture Solution](https://drive.google.com/file/d/16c7yOuQnZ4jiz6V3ppkuP2scqljTkpzb/view?usp=sharing)
 - **Problem 3**: Implementation available in `/aws_savings/services/optimizer.py`
 
 ## Project Overview
